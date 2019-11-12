@@ -1,0 +1,288 @@
+---
+- name: Setup hypress machine
+  hosts: 127.0.0.1
+  become: true
+
+  tasks:
+  - name: Load variables
+    include_vars:
+      file: settings.yml
+
+  - name: Install nodejs
+    package:
+      name: nodejs
+      state: present
+
+  - name: Install npm
+    package:
+      name: npm
+      state: present
+
+  - name: Install apache2
+    package:
+      name: apache2
+      state: present
+
+  - name: Install PHP7
+    package:
+      name: php7.2
+      state: present
+    notify:
+      - restart apache2
+
+  - name: Install MySQL
+    package:
+      name: mysql-server
+      state: present
+    notify:
+      - restart apache2
+
+  - name: Install PHP MySQL
+    package:
+      name: php-mysql
+      state: present
+    notify:
+      - restart apache2
+
+  - name: Start MySQL
+    service: name=mysql
+             enabled=yes
+             state=started
+
+  - name: Install phpMyAdmin
+    package:
+      name: phpmyadmin
+      state: present
+
+  - name: Install python-mysqldb
+    package:
+      name: python-mysqldb
+      state: present
+
+  - name: Setup MySQL user
+    mysql_user:
+      name: hypress
+      password: hypress
+      priv: '*.*:ALL'
+      state: present
+
+  - name: Setup MySQL database
+    mysql_db:
+      name: hypress
+      state: present
+
+  - name: Add hypress virtual host
+    copy:
+      dest: "/etc/apache2/sites-available/hypress.conf"
+      content: |
+        <VirtualHost *:80>
+            ServerAdmin webmaster@localhost
+            ServerName localhost
+            DocumentRoot /host-machine/.hypress/htdocs/wp
+            ErrorLog ${APACHE_LOG_DIR}/error.log
+            CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+            Alias /phpmyadmin "/usr/share/phpmyadmin"
+            <Directory /usr/share/phpmyadmin>
+              Options Indexes FollowSymLinks
+              AllowOverride All
+              Require all granted
+            </Directory>
+
+            <Directory /host-machine/.hypress/htdocs>
+              Options Indexes FollowSymLinks
+              AllowOverride All
+              Require all granted
+            </Directory>
+        </VirtualHost>
+
+  - stat:
+      path: /host-machine/.hypress/{{ hypress_slug }}.local.pem
+    register: result
+
+  - name: Add hypress virtual host for ssl
+    copy:
+      dest: "/etc/apache2/sites-available/hypress-ssl.conf"
+      content: |
+                <VirtualHost *:443>
+                    SSLEngine on
+                    SSLCertificateFile /host-machine/.hypress/{{ hypress_slug }}.local.pem
+                    SSLCertificateKeyFile /host-machine/.hypress/{{ hypress_slug }}.local-key.pem
+
+                    ServerAdmin webmaster@localhost
+                    ServerName localhost
+                    DocumentRoot /host-machine/.hypress/htdocs/wp
+                    ErrorLog ${APACHE_LOG_DIR}/error.log
+                    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+                    Alias /phpmyadmin "/usr/share/phpmyadmin"
+                    <Directory /usr/share/phpmyadmin>
+                      Options Indexes FollowSymLinks
+                      AllowOverride All
+                      Require all granted
+                    </Directory>
+
+                    <Directory /host-machine/.hypress/htdocs>
+                      Options Indexes FollowSymLinks
+                      AllowOverride All
+                      Require all granted
+                    </Directory>
+                </VirtualHost>
+    when: result.stat.exists == true
+
+  - name: a2enmod rewrite
+    command: a2enmod rewrite
+    notify:
+      - restart apache2
+
+  - name: a2enmod ssl
+    command: a2enmod ssl
+    notify:
+      - restart apache2
+
+  - name: a2ensite hypress
+    command: a2ensite hypress
+    notify:
+      - restart apache2
+
+  - name: a2ensite hypress-ssl
+    command: a2ensite hypress-ssl
+    notify:
+      - restart apache2
+    when: result.stat.exists == true
+
+  - name: a2dissite 000-default
+    command: a2dissite 000-default
+    notify:
+      - restart apache2
+
+  - stat:
+      path: /usr/local/bin/composer
+    register: result
+
+  - name: Install composer
+    shell: |
+            php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+            php composer-setup.php
+            mv composer.phar /usr/local/bin/composer
+            php -r "unlink('composer-setup.php');"
+    when: result.stat.exists == false
+
+  - name: Install WordPress
+    shell: |
+            cd /host-machine/
+            composer install
+
+  - stat:
+      path: /usr/local/bin/wp
+    register: result
+
+  - name: Download WP-CLI
+    get_url:
+      url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+      dest: /home/vagrant/wp-cli.phar
+    when: result.stat.exists == false
+
+  - name: Adjust WP CLI file permissions
+    file:
+      path: /home/vagrant/wp-cli.phar
+      mode: +x
+    when: result.stat.exists == false
+
+  - name: Install WP-CLI
+    shell: |
+            mv /home/vagrant/wp-cli.phar /usr/local/bin/wp
+    when: result.stat.exists == false
+
+  - stat:
+      path: /host-machine/.hypress/htdocs/wp/wp-content/themes/{{ hypress_slug }}
+    register: result
+
+  - name: Setup symlink to source
+    shell: |
+      cd /host-machine
+      ln -s ../../../../../src ./.hypress/htdocs/wp/wp-content/themes/{{ hypress_slug }}
+    when: result.stat.exists == false and
+          hypress_type == 'theme'
+
+  - stat:
+      path: /host-machine/.hypress/htdocs/wp/wp-content/plugins/{{ hypress_slug }}
+    register: result
+
+  - name: Setup symlink to source
+    shell: |
+        cd /host-machine
+        ln -s ../../../../../src ./.hypress/htdocs/wp/wp-content/plugins/{{ hypress_slug }}
+    when: result.stat.exists == false and
+          hypress_type == 'plugin'
+
+
+  - name: Run npm install
+    become_user: vagrant
+    shell: |
+      cd /host-machine
+      npm install
+
+  - name: Add startup script
+    cron:
+      name: "startup script"
+      special_time: reboot
+      job: "/host-machine/.hypress/scripts/startup.sh"
+
+  - name: Adjust startup script file permissions
+    file:
+      path: /host-machine/.hypress/scripts/startup.sh
+      mode: +x
+
+  - name: Run startup script
+    shell: |
+      /host-machine/.hypress/scripts/startup.sh
+
+  - name: Install WordPress instance
+    become_user: vagrant
+    shell: |
+            cd /host-machine/.hypress/htdocs/wp
+            if ! $(wp core is-installed); then
+              wp core install --admin_user=hypress --admin_password=hypress --url={{ hypress_slug }}.local --title=hypress --admin_email=root@example.com
+            fi
+            if (wp theme is-installed twentynineteen); then
+              wp theme uninstall twentynineteen
+            fi
+            if (wp theme is-installed twentyseventeen); then
+              wp theme uninstall twentyseventeen
+            fi
+            if (wp theme is-installed twentysixteen); then
+              wp theme uninstall twentysixteen
+            fi
+            if (wp plugin is-installed hello); then
+              wp plugin uninstall hello
+            fi
+            if (wp plugin is-installed akismet); then
+              wp plugin uninstall akismet
+            fi
+            if (wp post exists 1); then
+              wp post delete 1 --force
+            fi
+            if (wp post exists 2); then
+              wp post delete 2 --force
+            fi
+
+  - name: Activate theme
+    become_user: vagrant
+    shell: |
+            cd /host-machine/.hypress/htdocs/wp
+            wp theme activate {{ hypress_slug }}
+    when: hypress_type == 'theme'
+
+  - name: Activate plugin
+    become_user: vagrant
+    shell: |
+        cd /host-machine/.hypress/htdocs/wp
+        wp plugin activate {{ hypress_slug }}
+    when: hypress_type == 'plugin'
+
+
+  handlers:
+  - name: restart apache2
+    service: name=apache2
+             state=restarted

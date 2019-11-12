@@ -1,0 +1,30 @@
+{
+  "name": "acf-php-exporter",
+  "version": "0.0.0",
+  "authors": [
+    {
+      "name": "Cem Derin",
+      "email": "cem@wysiwyg.de"
+    }
+  ],
+  "require": {
+    "johnpbloch/wordpress": "5.2.4"
+  },
+  "extra": {
+    "wordpress-install-dir": "./.hypress/htdocs/wp/",
+    "installer-paths": {
+      "./.hypress/htdocs/wp/wp-content/mu-plugins/{$name}/": [
+        "type:wordpress-muplugin"
+      ],
+      "./.hypress/htdocs/wp/wp-content/plugins/{$name}/": [
+        "type:wordpress-plugin"
+      ],
+      "./.hypress/htdocs/wp/wp-content/themes/{$name}/": [
+        "type:wordpress-theme"
+      ]
+    }
+  },
+  "config": {
+    "vendor-dir": "src/vendor"
+  }
+}

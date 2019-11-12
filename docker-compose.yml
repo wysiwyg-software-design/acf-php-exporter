@@ -1,0 +1,53 @@
+version: "3.1"
+
+services:
+
+  apache:
+    container_name: ${hypress_slug}_webserver
+    build: ./.hypress/docker/build/apache
+    working_dir: /
+    env_file: .env
+    depends_on:
+      - php
+      - mysql
+    volumes:
+      - ./:/host-machine
+    environment:
+      - "TZ=Europe/Berlin"
+    ports:
+      - "80:80"
+
+  php:
+    container_name: ${hypress_slug}_php
+    build: ./.hypress/docker/build/php
+    working_dir: /
+    env_file: .env
+    volumes:
+      - ./:/host-machine
+    environment:
+      - "TZ=Europe/Berlin"
+
+  mysql:
+    container_name: ${hypress_slug}_mysql
+    build: ./.hypress/docker/build/mysql
+    env_file: .env
+    environment:
+      - "MYSQL_ROOT_PASSWORD=hypress"
+      - "MYSQL_USER=hypress"
+      - "MYSQL_PASSWORD=hypress"
+      - "MYSQL_DATABASE=hypress"
+      - "TZ=Europe/Berlin"
+    ports:
+      - "3306:3306"
+
+  hypress:
+    container_name: ${hypress_slug}_hypress
+    build: ./.hypress/docker/build/hypress
+    working_dir: /host-machine
+    env_file: .env
+    depends_on:
+      - php
+      - mysql
+    volumes:
+      - ./:/host-machine
+    command: .hypress/scripts/startup-foreground.sh

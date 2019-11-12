@@ -1,0 +1,8 @@
+{
+  "generator-hypress": {
+    "project-name": "ACF PHP Exporter",
+    "project-slug": "acf-php-exporter",
+    "author-name": "Cem Derin",
+    "author-email": "cem@wysiwyg.de"
+  }
+}
