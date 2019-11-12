@@ -6,6 +6,11 @@
 
 This plugins exports ACF configurations in PHP files on the fly for use in production environments.
 
+The plugin is looking for an `acf-php` directory within your theme directory. If no directory is found, the plugin
+does nothing.
+
+Please note: You need to set your WP instance into debug mode to use and see
+
 ## Usage
 ### Composer
 This plugin is available as composer package. To install it by composer use
@@ -13,3 +18,6 @@ This plugin is available as composer package. To install it by composer use
 ```bash
 composer require wy/acf-php-exporter
 ```
+
+## Cotributing
+Please check [Development Guidelines](./docs/DEVELOPMENT.md)
