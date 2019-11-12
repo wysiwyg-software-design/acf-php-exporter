@@ -1,6 +1,6 @@
 {
-  "name": "acf-php-exporter",
-  "version": "0.0.0",
+  "name": "wy/acf-php-exporter",
+  "version": "0.0.1",
   "authors": [
     {
       "name": "Cem Derin",
@@ -26,5 +26,6 @@
   },
   "config": {
     "vendor-dir": "src/vendor"
-  }
+  },
+  "type": "wypress-plugin"
 }

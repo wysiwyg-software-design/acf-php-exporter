@@ -30,7 +30,7 @@
 	define('DB_PASSWORD', 'hypress');
 
 	/** MySQL hostname */
-	define('DB_HOST', 'hypress_mysql');
+	define('DB_HOST', 'acf-php-exporter_mysql');
 
 	/** Database Charset to use in creating database tables. */
 	define('DB_CHARSET', 'utf8');
