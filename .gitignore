@@ -8,3 +8,4 @@ src/src
 src/private.js
 src/public.js
 .vagrant
+dist/
