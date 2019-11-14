@@ -1,6 +1,6 @@
 {
   "name": "wy/acf-php-exporter",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "authors": [
     {
@@ -28,5 +28,5 @@
   "config": {
     "vendor-dir": "src/vendor"
   },
-  "type": "wy-wordpress-plugin"
+  "type": "wordpress-plugin"
 }

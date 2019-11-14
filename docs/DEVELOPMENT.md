@@ -42,6 +42,14 @@ npm run bundle
 ```
 You'll find a ready to use bundle in `./dist`.
 
+## Version bump
+Following files contain version information:
+
+- `src/acf-php-exporter.php`
+- `composer.json`
+- `package.json`
+- `README.md`
+
 ## Contributing
 This projects is open for contributions.
 

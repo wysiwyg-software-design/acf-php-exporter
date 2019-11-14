@@ -5,3 +5,6 @@ src/vendor
 src/style.css
 src/style-private.css
 src/src
+src/private.js
+src/public.js
+.vagrant
