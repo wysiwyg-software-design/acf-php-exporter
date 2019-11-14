@@ -28,5 +28,5 @@
   "config": {
     "vendor-dir": "src/vendor"
   },
-  "type": "wy-wordpress-plugin"
+  "type": "wordpress-plugin"
 }
