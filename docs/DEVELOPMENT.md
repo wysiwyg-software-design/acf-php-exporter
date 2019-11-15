@@ -46,6 +46,7 @@ You'll find a ready to use bundle in `./dist`.
 Following files contain version information:
 
 - `src/acf-php-exporter.php`
+- `acf-php-exporter.php`
 - `composer.json`
 - `package.json`
 - `README.md`
