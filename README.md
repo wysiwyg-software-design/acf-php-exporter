@@ -1,7 +1,7 @@
 # ACF PHP Exporter WordPress Plugin
 ![Version](https://img.shields.io/badge/version-v1.1.0-violet.svg)
 ![Last commit](https://img.shields.io/github/last-commit/wysiwyg-software-design/acf-php-exporter.svg?style=flat)
-![Build status](https://api.travis-ci.org/wysiwyg-software-design/acf-php-exportersvg?branch=develop)
+![Build status](https://api.travis-ci.org/wysiwyg-software-design/acf-php-exporter.svg?branch=master)
 ![WordPress v5.2.4](https://img.shields.io/badge/wordpress-v5.2.4-blue.svg)
 
 This plugins exports ACF configurations in PHP files on the fly for use in production environments.
