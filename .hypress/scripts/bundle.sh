@@ -8,3 +8,4 @@ rm ./dist/public.js
 rm ./dist/private.js
 rm ./dist/style.css
 rm ./dist/style-private.css
+rm -R ./dist/vendor
