@@ -7,3 +7,5 @@
  * Author: Cem Derin (wysiwyg software design GmbH)
  * Author URI: https://github.com/wysiwyg-software-design/acf-php-exporter
  */
+
+require_once 'dist/acf-php-exporter.php';
