@@ -1,3 +1,6 @@
+> [!CAUTION]
+> This repository is deprecated and will be removed in September 2025
+
 # ACF PHP Exporter WordPress Plugin
 ![Version](https://img.shields.io/badge/version-v1.1.0-violet.svg)
 ![Last commit](https://img.shields.io/github/last-commit/wysiwyg-software-design/acf-php-exporter.svg?style=flat)
